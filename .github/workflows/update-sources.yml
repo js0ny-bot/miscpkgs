@@ -26,16 +26,6 @@ jobs:
       - name: Update nixpkgs
         run: nix flake update nixpkgs
 
-      - name: Update nvfetcher sources
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          umask 077
-          keyfile="$RUNNER_TEMP/nvchecker-keys.toml"
-          trap 'rm -f "$keyfile"' EXIT
-          printf '[keys]\ngithub = "%s"\n' "$GITHUB_TOKEN" > "$keyfile"
-          nix run --inputs-from path:. nixpkgs#nvfetcher -- -c nvfetcher.toml -o _sources --keyfile "$keyfile"
-
       - name: Update package pins
         env:
           GITHUB_TOKEN: ${{ github.token }}
