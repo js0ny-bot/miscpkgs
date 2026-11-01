@@ -4,7 +4,6 @@
   bash,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "forgejo-file-icons";

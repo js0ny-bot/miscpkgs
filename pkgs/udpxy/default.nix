@@ -3,7 +3,6 @@
   lib,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "udpxy";

@@ -6,7 +6,6 @@
   nodejs_24,
   pkg-config,
   libsecret,
-  ...
 }:
 let
   pins = builtins.fromJSON (builtins.readFile ./pins.json);

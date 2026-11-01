@@ -1,18 +1,22 @@
 {
+  lib,
   rustPlatform,
+  fetchFromGitHub,
+
+  # build tools
   glib,
   pkg-config,
   wrapGAppsHook4,
+
+  # dependencies
   dbus,
   gtk4,
-  openssl,
   libadwaita,
-  webkitgtk_6_0,
-  fetchFromGitHub,
-  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  lib,
+  openssl,
   poppler-utils,
-  ...
+  webkitgtk_6_0,
+
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "vireo";

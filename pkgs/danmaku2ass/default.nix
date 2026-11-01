@@ -1,13 +1,18 @@
-{ pkgs, lib, ... }:
+{
+  lib,
+  fetchurl,
+  writeShellApplication,
+  python3,
+}:
 let
-  src = pkgs.fetchurl {
+  src = fetchurl {
     url = "https://raw.githubusercontent.com/m13253/danmaku2ass/refs/heads/master/danmaku2ass.py";
     sha256 = "sha256-iZUmt6jzGrIJh73OvFQ/Z76azNzsYSDSDznPxO+gAc8=";
   };
 in
-pkgs.writeShellApplication {
+writeShellApplication {
   name = "danmaku2ass";
-  runtimeInputs = with pkgs; [
+  runtimeInputs = [
     python3
   ];
   text = ''

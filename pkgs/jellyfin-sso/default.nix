@@ -5,7 +5,6 @@
   lib,
   buildDotnetModule,
   dotnetCorePackages,
-  ...
 }:
 let
   pname = "jellyfin-plugin-sso";

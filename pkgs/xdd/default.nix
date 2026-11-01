@@ -6,7 +6,6 @@
   stdenv,
   makeDesktopItem,
   copyDesktopItems,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "xdd";

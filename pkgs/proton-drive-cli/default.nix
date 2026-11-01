@@ -4,7 +4,6 @@
   glib,
   lib,
   fetchurl,
-  ...
 }:
 let
   pins = builtins.fromJSON (builtins.readFile ./pins.json);

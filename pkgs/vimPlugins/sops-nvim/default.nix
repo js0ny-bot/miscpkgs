@@ -3,7 +3,6 @@
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   vimUtils,
   lib,
-  ...
 }:
 vimUtils.buildVimPlugin {
   pname = "sops-nvim";

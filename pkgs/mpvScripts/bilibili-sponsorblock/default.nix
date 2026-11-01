@@ -6,7 +6,6 @@
   mpv,
   pkg-config,
   lib,
-  ...
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {

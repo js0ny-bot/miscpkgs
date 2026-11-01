@@ -7,7 +7,6 @@
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "wdotool";

@@ -5,7 +5,6 @@
   fetchFromGitHub,
   zstd,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 let
   frontend = callPackage ./frontend.nix { pins = pins.frontend; };

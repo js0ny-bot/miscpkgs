@@ -6,7 +6,6 @@
   nix-update-script,
   stdenv,
   versionCheckHook,
-  ...
 }:
 
 buildGo127Module (finalAttrs: {
@@ -36,7 +35,8 @@ buildGo127Module (finalAttrs: {
 
   postInstall = ''
     ln -s proton $out/bin/proton-cli
-  '' + lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
+  ''
+  + lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
     installShellCompletion --cmd proton \
       --bash <($out/bin/proton completion bash) \
       --fish <($out/bin/proton completion fish) \

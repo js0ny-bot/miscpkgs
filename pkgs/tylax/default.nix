@@ -3,7 +3,6 @@
   nix-update-script,
   rustPlatform,
   fetchFromGitHub,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "tylax";

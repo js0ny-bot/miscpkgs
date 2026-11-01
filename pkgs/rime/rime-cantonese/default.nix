@@ -3,7 +3,6 @@
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   lib,
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "rime-cantonese";

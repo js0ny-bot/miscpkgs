@@ -1,8 +1,8 @@
 {
   lib,
-  pkgs,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  typst-overlay = pkgs.callPackage ./typst-overlay { };
-  kitty-graphics = pkgs.callPackage ./kitty-graphics { };
+  typst-overlay = callPackage ./typst-overlay { };
+  kitty-graphics = callPackage ./kitty-graphics { };
 }

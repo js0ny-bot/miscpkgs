@@ -3,7 +3,6 @@
   stdenvNoCC,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "rime-latex";

@@ -1,17 +1,22 @@
 {
+  lib,
   buildGoModule,
   fetchFromGitHub,
+  stdenv,
+  nix-update-script,
+
+  # build tools
+  pkg-config,
+  wrapGAppsHook3,
+
+  # GUI dependencies
   fontconfig,
   gtk3,
-  lib,
-  nix-update-script,
-  pkg-config,
-  stdenv,
-  versionCheckHook,
   wayland,
   webkitgtk_4_1,
-  wrapGAppsHook3,
-  ...
+
+  # tests
+  versionCheckHook,
 }:
 let
   mkMagpie =

@@ -1,11 +1,10 @@
 {
   lib,
-  pcre2,
-  fetchFromGitHub,
-  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
+  fetchFromGitHub,
   xmake,
-  ...
+  pcre2,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "danmakufactory";

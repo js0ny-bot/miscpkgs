@@ -4,7 +4,6 @@
   makeWrapper,
   cacert,
   lib,
-  ...
 }:
 
 buildGoModule (finalAttrs: {

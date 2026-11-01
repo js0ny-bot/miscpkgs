@@ -3,7 +3,6 @@
   lib,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 python3Packages.buildPythonPackage (finalAttrs: {
   pname = "mdformat-obsidian";

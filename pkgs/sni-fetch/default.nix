@@ -3,7 +3,6 @@
   buildGoModule,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 buildGoModule (finalAttrs: {
   pname = "sni-fetch";

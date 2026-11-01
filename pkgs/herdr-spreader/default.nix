@@ -2,7 +2,6 @@
   fetchFromGitHub,
   lib,
   rustPlatform,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "herdr-spreader";

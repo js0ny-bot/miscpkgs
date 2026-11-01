@@ -7,7 +7,6 @@
   dotnetCorePackages,
   zlib,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 buildDotnetModule (finalAttrs: {
   pname = "bbdown";

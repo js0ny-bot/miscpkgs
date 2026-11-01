@@ -7,7 +7,6 @@
   dotnetCorePackages,
   jq,
   yq-go,
-  ...
 }:
 let
   jellyfinAbiVersion = builtins.fromJSON (builtins.readFile ./target-abi.json);

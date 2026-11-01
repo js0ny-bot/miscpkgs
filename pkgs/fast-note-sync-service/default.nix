@@ -3,7 +3,6 @@
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   buildGoModule,
   lib,
-  ...
 }:
 let
   repo = "github.com/haierkeys/fast-note-sync-service";

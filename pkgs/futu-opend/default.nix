@@ -2,9 +2,13 @@
   lib,
   stdenv,
   fetchurl,
+
+  # build tools
   appimageTools,
   makeWrapper,
   patchelf,
+
+  # runtime libraries
   alsa-lib,
   e2fsprogs,
   expat,
@@ -22,7 +26,6 @@
   sqlite,
   util-linux,
   zlib,
-  ...
 }:
 let
   pname = "futu-opend";

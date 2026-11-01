@@ -3,12 +3,13 @@
   stdenvNoCC,
   buildFHSEnv,
   fetchurl,
+
+  # build tools
   gnugrep,
   makeDesktopItem,
   unzip,
   writeShellScript,
   writeShellScriptBin,
-  ...
 }:
 let
   pname = "ccstudio";

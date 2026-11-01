@@ -1,8 +1,8 @@
 {
   lib,
-  pkgs,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  libgen-api = pkgs.callPackage ./libgen-api.nix { };
-  mdformat-obsidian = pkgs.callPackage ./mdformat-obsidian { };
+  libgen-api = callPackage ./libgen-api.nix { };
+  mdformat-obsidian = callPackage ./mdformat-obsidian { };
 }

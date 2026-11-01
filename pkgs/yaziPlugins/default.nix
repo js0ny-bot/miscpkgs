@@ -1,7 +1,7 @@
 {
   lib,
-  pkgs,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  dump-tabs = pkgs.callPackage ./dump-tabs { };
+  dump-tabs = callPackage ./dump-tabs { };
 }

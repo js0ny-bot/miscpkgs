@@ -3,7 +3,6 @@
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenvNoCC,
   lib,
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "rime-hokkien";

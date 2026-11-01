@@ -30,7 +30,6 @@
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   lib,
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "sioyek-python-extensions";

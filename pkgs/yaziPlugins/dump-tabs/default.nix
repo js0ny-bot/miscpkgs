@@ -1,11 +1,10 @@
 {
-  pkgs,
+  stdenvNoCC,
   lib,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
-pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "dump-tabs";
   inherit (pins) version;
   src = fetchFromGitHub {

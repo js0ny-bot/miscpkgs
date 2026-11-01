@@ -3,7 +3,6 @@
   lib,
   fetchurl,
   stdenvNoCC,
-  ...
 }:
 let
   pins = builtins.fromJSON (builtins.readFile ./pins.json);

@@ -7,7 +7,6 @@
   stdenv,
   versionCheckHook,
   xdg-utils,
-  ...
 }:
 let
   tsupEsbuild = callPackage ./esbuild.nix { };

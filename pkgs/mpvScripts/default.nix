@@ -1,7 +1,7 @@
 {
   lib,
-  pkgs,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  bilibili-sponsorblock = pkgs.callPackage ./bilibili-sponsorblock { };
+  bilibili-sponsorblock = callPackage ./bilibili-sponsorblock { };
 }

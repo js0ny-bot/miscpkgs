@@ -3,7 +3,6 @@
   lib,
   cmake,
   fetchFromGitHub,
-  ...
 }:
 let
   pins = builtins.fromJSON (builtins.readFile ./pins.json);

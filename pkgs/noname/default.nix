@@ -1,14 +1,16 @@
 {
   lib,
   stdenv,
+  fetchFromGitHub,
   fetchPnpmDeps,
-  pnpmConfigHook,
+
+  # build tools
   makeWrapper,
   nodejs_24,
   pnpm_10,
-  fetchFromGitHub,
+  pnpmConfigHook,
+
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "noname";

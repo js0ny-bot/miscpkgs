@@ -1,14 +1,18 @@
 {
+  lib,
+  rustPlatform,
+  stdenv,
+  fetchFromGitHub,
+
+  # build tools
+  pkg-config,
+
+  # dependencies
   alsa-lib,
   dbus,
-  lib,
   openssl,
-  pkg-config,
-  rustPlatform,
-  fetchFromGitHub,
+
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  stdenv,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "ratune";

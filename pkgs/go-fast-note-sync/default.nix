@@ -3,7 +3,6 @@
   lib,
   fetchFromGitHub,
   pins ? builtins.fromJSON (builtins.readFile ./pins.json),
-  ...
 }:
 buildGoModule (finalAttrs: {
   pname = "go-fast-note-sync";

@@ -1,12 +1,20 @@
 {
-  pkgs,
-  winepkg ? pkgs.wine64,
   lib,
   stdenvNoCC,
-  ...
+  fetchzip,
+
+  # NativeBuildInputs
+  makeWrapper,
+  makeDesktopItem,
+  copyDesktopItems,
+  icoutils,
+
+  # Args
+  wine64,
+  winepkg ? wine64,
 }:
 let
-  version = "0.7.1";
+  version = "0.7.3";
   dlVersion = builtins.replaceStrings [ "." ] [ "" ] version;
   description = "clrmamepro is a software that allows you to check and rebuild your arcade romsets according to an information file in xml or dat format.";
 in
@@ -14,15 +22,15 @@ stdenvNoCC.mkDerivation {
   pname = "clrmamepro";
   inherit version;
 
-  src = pkgs.fetchzip {
+  src = fetchzip {
     url = "https://mamedev.emulab.it/clrmamepro/binaries/clrmame_v${dlVersion}.zip";
-    hash = "sha256-/smkK8n+gY/df4Ry3OmyYw9OupcbtczN69QiUwvB43g=";
+    hash = "sha256-Lr0BOAf0tyiXXH+eKXwutr4rETytwjD5csyRBrnpA5w=";
     stripRoot = false;
   };
   nativeBuildInputs = [
-    pkgs.makeWrapper
-    pkgs.copyDesktopItems
-    pkgs.icoutils
+    makeWrapper
+    copyDesktopItems
+    icoutils
   ];
 
   dontConfigure = true;
@@ -56,7 +64,7 @@ stdenvNoCC.mkDerivation {
   '';
 
   desktopItems = [
-    (pkgs.makeDesktopItem {
+    (makeDesktopItem {
       name = "clrmamepro";
       exec = "clrmameUI %u";
       icon = "clrmamepro";
