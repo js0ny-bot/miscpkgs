@@ -1,10 +1,7 @@
 {
   lib,
-  pkgs,
-  sources,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  bilibili-sponsorblock = pkgs.callPackage ./bilibili-sponsorblock.nix {
-    inherit sources;
-  };
+  bilibili-sponsorblock = callPackage ./bilibili-sponsorblock { };
 }

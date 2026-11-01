@@ -1,15 +1,19 @@
 {
   stdenv,
   lib,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
 }:
-let
-  p = sources.udpxy;
-in
-stdenv.mkDerivation {
-  inherit (p) pname version src;
+stdenv.mkDerivation (finalAttrs: {
+  pname = "udpxy";
+  inherit (pins) version;
+  src = fetchFromGitHub {
+    owner = "pcherenkov";
+    repo = "udpxy";
+    inherit (pins) rev hash;
+  };
 
-  sourceRoot = "${p.src.name}/chipmunk";
+  sourceRoot = "${finalAttrs.src.name}/chipmunk";
 
   enableParallelBuilding = true;
 
@@ -35,4 +39,4 @@ stdenv.mkDerivation {
     platforms = lib.platforms.linux;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

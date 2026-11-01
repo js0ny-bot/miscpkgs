@@ -1,12 +1,11 @@
 {
   unzip,
   lib,
-  sources,
+  fetchurl,
   stdenvNoCC,
 }:
 let
-  flypy = sources.rime-wanxiang-flypy;
-  zrm = sources.rime-wanxiang-zrm;
+  pins = builtins.fromJSON (builtins.readFile ./pins.json);
   makeWanxiang =
     {
       lib,
@@ -56,11 +55,15 @@ in
 {
   rime-wanxiang-flypy = makeWanxiang {
     inherit lib;
-    inherit (flypy) pname version src;
+    pname = "rime-wanxiang-flypy";
+    inherit (pins) version;
+    src = fetchurl pins.flypy;
   };
 
   rime-wanxiang-zrm = makeWanxiang {
     inherit lib;
-    inherit (zrm) pname version src;
+    pname = "rime-wanxiang-zrm";
+    inherit (pins) version;
+    src = fetchurl pins.zrm;
   };
 }

@@ -1,23 +1,23 @@
 {
   lib,
   rustPlatform,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
 }:
-let
-  p = sources.flyline;
-in
-rustPlatform.buildRustPackage {
+rustPlatform.buildRustPackage (finalAttrs: {
   __structuredAttrs = true;
 
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
+  pname = "flyline";
+  inherit (pins) version;
 
-  cargoDeps = rustPlatform.importCargoLock {
-    lockFile = "${p.src}/Cargo.lock";
-    allowBuiltinFetchGit = true;
+  src = fetchFromGitHub {
+    owner = "HalFrgrd";
+    repo = "flyline";
+    inherit (pins) rev hash;
   };
-  cargoHash = null;
+
+  inherit (pins) cargoHash;
 
   preConfigure = lib.optionalString stdenv.hostPlatform.isDarwin /* bash */ ''
     export RUSTFLAGS="--remap-path-prefix=$NIX_BUILD_TOP=/build -C link-arg=-undefined -C link-arg=dynamic_lookup -C link-arg=-Wl,-install_name,@rpath/libflyline.dylib -C link-arg=-Wl,-reproducible''${RUSTFLAGS:+ $RUSTFLAGS}"
@@ -38,4 +38,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.unix;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

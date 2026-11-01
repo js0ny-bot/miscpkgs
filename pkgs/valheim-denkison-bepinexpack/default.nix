@@ -2,7 +2,6 @@
   stdenvNoCC,
   fetchzip,
   lib,
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "valheim-denkison-bepinexpack";

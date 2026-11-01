@@ -27,15 +27,19 @@
 {
   sioyek,
   stdenvNoCC,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   lib,
 }:
-let
-  p = sources.sioyek-python-extensions;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+stdenvNoCC.mkDerivation (finalAttrs: {
+  pname = "sioyek-python-extensions";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "ahrm";
+    repo = "sioyek-python-extensions";
+    inherit (pins) rev hash;
+  };
 
   installPhase = ''
     runHook preInstall
@@ -52,4 +56,4 @@ stdenvNoCC.mkDerivation {
     license = lib.licenses.gpl3Only;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

@@ -6,7 +6,6 @@
   makeDesktopItem,
   writeShellScript,
   fetchurl,
-  ...
 }:
 let
   pname = "FTNN";

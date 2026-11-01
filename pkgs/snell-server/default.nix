@@ -5,7 +5,6 @@
   autoPatchelfHook,
   lib,
   stdenv,
-  ...
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "snell-server";

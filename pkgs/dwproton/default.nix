@@ -1,10 +1,9 @@
 {
   stdenvNoCC,
   lib,
-  sources,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
 }:
 let
-  p = sources.dwproton;
   makeDWProton =
     {
       pname,
@@ -35,8 +34,12 @@ let
 in
 let
   dwproton = makeDWProton {
-    inherit (p) pname src;
-    version = lib.removePrefix "dwproton-" p.version;
+    pname = "dwproton";
+    inherit (pins) version;
+    src = fetchTarball {
+      inherit (pins) url;
+      sha256 = pins.hash;
+    };
   };
   dwproton-11 =
     let

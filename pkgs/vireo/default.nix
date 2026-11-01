@@ -1,25 +1,34 @@
 {
+  lib,
   rustPlatform,
+  fetchFromGitHub,
+
+  # build tools
   glib,
   pkg-config,
   wrapGAppsHook4,
+
+  # dependencies
   dbus,
   gtk4,
-  openssl,
   libadwaita,
-  webkitgtk_6_0,
-  sources,
-  lib,
+  openssl,
   poppler-utils,
-}:
-let
-  p = sources.vireo;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
+  webkitgtk_6_0,
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+}:
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "vireo";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "hyprlab";
+    repo = "vireo";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   nativeBuildInputs = [
     glib
@@ -50,4 +59,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.linux;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

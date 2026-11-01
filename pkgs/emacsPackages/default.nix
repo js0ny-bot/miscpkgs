@@ -1,9 +1,8 @@
 {
   lib,
-  pkgs,
-  sources,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  typst-overlay = pkgs.callPackage ./typst-overlay.nix { inherit sources; };
-  kitty-graphics = pkgs.callPackage ./kitty-graphics.nix { inherit sources; };
+  typst-overlay = callPackage ./typst-overlay { };
+  kitty-graphics = callPackage ./kitty-graphics { };
 }

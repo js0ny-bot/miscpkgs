@@ -2,8 +2,6 @@
   stdenvNoCC,
   lib,
   fetchurl,
-  gnutar,
-  ...
 }:
 let
   manifest = with builtins; fromJSON (readFile ./manifest.json);

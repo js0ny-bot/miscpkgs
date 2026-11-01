@@ -1,22 +1,30 @@
 {
+  lib,
+  rustPlatform,
+  stdenv,
+  fetchFromGitHub,
+
+  # build tools
+  pkg-config,
+
+  # dependencies
   alsa-lib,
   dbus,
-  lib,
   openssl,
-  pkg-config,
-  rustPlatform,
-  sources,
-  stdenv,
-  ...
-}:
-let
-  p = sources.ratune;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+}:
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "ratune";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "acmagn";
+    repo = "ratune";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ pkg-config ];
 
@@ -34,4 +42,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

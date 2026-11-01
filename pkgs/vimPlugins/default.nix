@@ -1,15 +1,10 @@
 {
   lib,
-  pkgs,
-  sources,
+  callPackage,
 }:
 lib.recurseIntoAttrs {
-  sops-nvim = pkgs.callPackage ./sops-nvim.nix {
-    inherit sources;
-  };
-  typst-infect-nvim = pkgs.callPackage ./typst-infect-nvim.nix {
-    inherit sources;
-  };
-  code-runner-nvim = pkgs.callPackage ./code-runer-nvim.nix { };
-  overleaf-nvim = pkgs.callPackage ./overleaf-nvim { };
+  sops-nvim = callPackage ./sops-nvim { };
+  typst-infect-nvim = callPackage ./typst-infect-nvim { };
+  code-runner-nvim = callPackage ./code-runer-nvim.nix { };
+  overleaf-nvim = callPackage ./overleaf-nvim { };
 }

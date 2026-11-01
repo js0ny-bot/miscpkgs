@@ -1,16 +1,18 @@
 {
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenvNoCC,
   lib,
-  ...
 }:
-let
-  p = sources.firefox-csshacks;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p) src;
+stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "firefox-csshacks";
-  version = "0-unstable-${p.date}";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "MrOtherGuy";
+    repo = "firefox-csshacks";
+    inherit (pins) rev hash;
+  };
 
   installPhase = ''
     runHook preInstall
@@ -27,4 +29,4 @@ stdenvNoCC.mkDerivation {
     license = lib.licenses.mpl20;
     sourceProvenance = [ lib.sourceProvenance.fromSource ];
   };
-}
+})

@@ -1,15 +1,19 @@
 {
   lib,
   buildGoModule,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
 }:
-let
-  p = sources.sni-fetch;
-in
-buildGoModule {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
-  vendorHash = "sha256-gZKsRK45K8SOwviLruLY4e5wZ4eEZTxEiTEBW5hFlps=";
+buildGoModule (finalAttrs: {
+  pname = "sni-fetch";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "HelloLingC";
+    repo = "SNI-Fetch";
+    inherit (pins) rev hash;
+  };
+  inherit (pins) vendorHash;
 
   env.CGO_ENABLED = 0;
   subPackages = [ "." ];
@@ -19,4 +23,4 @@ buildGoModule {
     mainProgram = "sni-fetch";
     platforms = lib.platforms.linux;
   };
-}
+})

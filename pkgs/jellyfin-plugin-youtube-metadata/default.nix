@@ -5,7 +5,6 @@
   nix-update-script,
   stdenvNoCC,
   yt-dlp,
-  ...
 }:
 
 stdenvNoCC.mkDerivation (finalAttrs: {

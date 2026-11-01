@@ -1,31 +1,34 @@
 {
+  lib,
+  rustPlatform,
+  stdenv,
+  stdenvNoCC,
+  fetchFromGitHub,
+  fetchzip,
+
+  # build tools
   autoPatchelfHook,
   clang,
   cmake,
   copyDesktopItems,
-  fetchFromGitHub,
-  fetchzip,
+  llvmPackages,
+  makeDesktopItem,
+  makeWrapper,
+  pkg-config,
+
+  # runtime dependencies
   fontconfig,
   freetype,
   krb5,
-  lib,
   libGL,
   libX11,
   libxcb,
   libxkbcommon,
-  llvmPackages,
-  makeDesktopItem,
-  makeWrapper,
   openssl,
-  pkg-config,
-  rustPlatform,
-  stdenv,
-  stdenvNoCC,
   vulkan-loader,
   wayland,
   xdg-utils,
   zstd,
-  ...
 }:
 let
   libraries = [

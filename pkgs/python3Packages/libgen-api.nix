@@ -2,7 +2,6 @@
   python3Packages,
   fetchzip,
   lib,
-  ...
 }:
 python3Packages.buildPythonPackage {
   pname = "libgen-api";

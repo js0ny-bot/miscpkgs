@@ -3,7 +3,6 @@
   rustPlatform,
   fetchgit,
   nix-update-script,
-  ...
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "cli2mcp";

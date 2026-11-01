@@ -2,7 +2,6 @@
   stdenvNoCC,
   fetchurl,
   lib,
-  ...
 }:
 let
   version = "0.10.2.0";

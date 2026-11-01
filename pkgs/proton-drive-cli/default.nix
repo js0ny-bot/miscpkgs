@@ -3,22 +3,24 @@
   libsecret,
   glib,
   lib,
-  sources,
+  fetchurl,
 }:
 let
+  pins = builtins.fromJSON (builtins.readFile ./pins.json);
   archMap = {
-    "x86_64-linux" = sources.proton-drive-cli-linux-x64;
-    "aarch64-linux" = sources.proton-drive-cli-linux-arm64;
-    "aarch64-darwin" = sources.proton-drive-cli-darwin-arm64;
+    "x86_64-linux" = pins.linux-x64;
+    "aarch64-linux" = pins.linux-arm64;
+    "aarch64-darwin" = pins.darwin-arm64;
   };
 
   system = stdenv.hostPlatform.system;
 
   p = archMap.${system} or (throw "Proton Drive CLI: Unsupported system ${system}");
 in
-stdenv.mkDerivation {
+stdenv.mkDerivation (finalAttrs: {
   pname = "proton-drive-cli";
-  inherit (p) version src;
+  inherit (pins) version;
+  src = fetchurl p;
   dontUnpack = true;
   # when stripping, bun executable payload is after the ELF header
   dontStrip = true;
@@ -41,4 +43,4 @@ stdenv.mkDerivation {
     platforms = [ "x86_64-linux" ];
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
-}
+})
