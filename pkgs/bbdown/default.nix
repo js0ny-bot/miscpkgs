@@ -1,17 +1,23 @@
 # BBDown/Directory.Build.props: NativeAOT
 {
   lib,
-  sources,
+  fetchFromGitHub,
   buildDotnetModule,
   clang,
   dotnetCorePackages,
   zlib,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+  ...
 }:
-let
-  p = sources.bbdown;
-in
-buildDotnetModule {
-  inherit (p) pname version src;
+buildDotnetModule (finalAttrs: {
+  pname = "bbdown";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "nilaoda";
+    repo = "BBDown";
+    inherit (pins) rev hash;
+  };
   nugetDeps = ./deps.json;
 
   # Use objcopy provided by llvm
@@ -32,11 +38,11 @@ buildDotnetModule {
   executables = [ "BBDown" ];
 
   meta = {
-    description = "Bilibili Downloader. 一个命令行式哔哩哔哩下载器.";
+    description = "Command-line downloader for Bilibili videos";
     homepage = "https://github.com/nilaoda/BBDown";
     license = lib.licenses.mit;
     platforms = with lib.platforms; linux ++ darwin;
     mainProgram = "BBDown";
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

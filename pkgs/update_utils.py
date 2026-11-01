@@ -166,6 +166,36 @@ def prefetch_cargo_deps(package_dir, pins):
     )
 
 
+def prefetch_nuget_deps(package_dir, pins):
+    with tempfile.TemporaryDirectory(prefix=f"{package_dir.name}-") as temporary:
+        candidate = Path(temporary) / "pins.json"
+        candidate.write_text(json.dumps(pins) + "\n")
+        expression = Path(temporary) / "fetch-deps.nix"
+        expression.write_text(
+            DEPENDENCY_DERIVATION.replace("__DEPENDENCY__", "fetch-deps")
+        )
+        script = run(
+            "nix", "build", "--impure", "--no-link", "--print-out-paths",
+            "--file", str(expression),
+            "--argstr", "repo", str(REPO_DIR),
+            "--argstr", "packageDir", str(package_dir),
+            "--argstr", "pinsFile", str(candidate),
+        )
+        deps_file = Path(temporary) / "deps.json"
+        run(script, str(deps_file))
+        content = deps_file.read_bytes()
+        dependencies = json.loads(content)
+        if not isinstance(dependencies, list):
+            raise ValueError("Expected a NuGet dependency list")
+        for dependency in dependencies:
+            if not isinstance(dependency, dict) or not all(
+                isinstance(dependency.get(key), str) and dependency[key]
+                for key in ("pname", "version", "hash")
+            ):
+                raise ValueError("Invalid NuGet dependency entry")
+        return content
+
+
 def atomic_write(path, content):
     path = Path(path)
     temporary = None
@@ -186,7 +216,7 @@ def write_pins(path, pins):
     atomic_write(path, (json.dumps(pins, indent=2) + "\n").encode())
 
 
-def update_release(package_dir, owner, repo, prepare):
+def update_release(package_dir, owner, repo, prepare, *, nuget_deps=False):
     parser = argparse.ArgumentParser(
         description=f"Update {package_dir.name} source and dependency pins"
     )
@@ -206,5 +236,8 @@ def update_release(package_dir, owner, repo, prepare):
     source_hash, source = prefetch_source(owner, repo, rev)
     pins = {"version": version, "rev": rev, "hash": source_hash}
     pins.update(prepare(pins, source))
+    if nuget_deps:
+        deps = prefetch_nuget_deps(package_dir, pins)
+        atomic_write(package_dir / "deps.json", deps)
     write_pins(pins_file, pins)
     print(f"Updated {package_dir.name} {version} at {rev}")

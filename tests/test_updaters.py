@@ -125,6 +125,54 @@ class UpdaterTests(unittest.TestCase):
         )
         self.assertEqual(list(self.package.iterdir()), [self.pins_file])
 
+    def test_optional_nuget_deps_are_written_after_fetch(self):
+        deps_file = self.package / "deps.json"
+        deps_file.write_bytes(b"old dependencies\n")
+        new_deps = b'[{"pname":"example","version":"1.0","hash":"sha256-example"}]\n'
+        with (
+            patch.object(sys, "argv", ["update.py", "--force"]),
+            patch.object(update_utils, "latest_release", return_value=("1.0.0", REV)),
+            patch.object(update_utils, "prefetch_source", return_value=(SOURCE_HASH, self.root)),
+            patch.object(update_utils, "prefetch_nuget_deps", return_value=new_deps) as fetch,
+        ):
+            update_utils.update_release(self.package, "owner", "repo", lambda *_: {}, nuget_deps=True)
+        fetch.assert_called_once_with(self.package, self.current)
+        self.assertEqual(deps_file.read_bytes(), new_deps)
+        self.assertEqual(json.loads(self.pins_file.read_text()), self.current)
+
+    def test_nuget_fetch_failure_preserves_both_files(self):
+        deps_file = self.package / "deps.json"
+        deps_file.write_bytes(b"old dependencies\n")
+        with (
+            patch.object(sys, "argv", ["update.py", "--force"]),
+            patch.object(update_utils, "latest_release", return_value=("1.0.0", REV)),
+            patch.object(update_utils, "prefetch_source", return_value=(SOURCE_HASH, self.root)),
+            patch.object(update_utils, "prefetch_nuget_deps", side_effect=RuntimeError("fetch failed")),
+            self.assertRaisesRegex(RuntimeError, "fetch failed"),
+        ):
+            update_utils.update_release(self.package, "owner", "repo", lambda *_: {}, nuget_deps=True)
+        self.assertEqual(deps_file.read_bytes(), b"old dependencies\n")
+        self.assertEqual(self.pins_file.read_bytes(), self.original)
+
+    def test_nuget_helper_runs_with_candidate_pins_and_validates_output(self):
+        data = [{"pname": "example", "version": "1.0", "hash": SOURCE_HASH}]
+
+        def run(*args):
+            if args[0] == "nix":
+                self.assertEqual(json.loads(Path(args[-1]).read_text()), self.current)
+                self.assertIn("fetch-deps", Path(args[args.index("--file") + 1]).read_text())
+                return "/nix/store/fetch-deps"
+            Path(args[1]).write_text(json.dumps(data))
+            return ""
+
+        with patch.object(update_utils, "run", side_effect=run):
+            self.assertEqual(json.loads(update_utils.prefetch_nuget_deps(self.package, self.current)), data)
+            data.clear()
+            self.assertEqual(json.loads(update_utils.prefetch_nuget_deps(self.package, self.current)), [])
+            data.append({"pname": "example"})
+            with self.assertRaisesRegex(ValueError, "Invalid NuGet"):
+                update_utils.prefetch_nuget_deps(self.package, self.current)
+
     def test_failed_preparation_preserves_pins(self):
         def fail(*_):
             raise RuntimeError("Dependency fetch failed")

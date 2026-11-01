@@ -71,13 +71,13 @@
   },
   {
     "pname": "runtime.linux-arm64.Microsoft.DotNet.ILCompiler",
-    "version": "8.0.28",
-    "hash": "sha256-1jqvDbxpmDaUoPvmYQ5iC0mCwN1965XuTyiIp+3DcPI="
+    "version": "8.0.31",
+    "hash": "sha256-oxkScF6OzoZH7ktS/Jo8p+lrw8D+Urjn+KV3pAGdozI="
   },
   {
     "pname": "runtime.osx-arm64.Microsoft.DotNet.ILCompiler",
-    "version": "8.0.28",
-    "hash": "sha256-kmxllFG3knfkr4SzpiQ4xa6oRWCnIoI1jGVY5sHKsAw="
+    "version": "8.0.31",
+    "hash": "sha256-vjwBH5H87yHf5aYDS2nmPgA2zaozi1WykcXgBnVfkSY="
   },
   {
     "pname": "SharpZipLib",

@@ -1,7 +1,3 @@
-[bbdown]
-src.github = "nilaoda/BBDown"
-fetch.github = "nilaoda/BBDown"
-
 [mdformat-obsidian]
 src.github_tag = "KyleKing/mdformat-obsidian"
 fetch.github = "KyleKing/mdformat-obsidian"
