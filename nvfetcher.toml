@@ -23,10 +23,6 @@ fetch.github = "HalFrgrd/flyline"
 src.github_tag = "test482/mpv-bilibili-sponsorblock"
 fetch.github = "test482/mpv-bilibili-sponsorblock"
 
-[go-fast-note-sync]
-src.github = "erichll/go-fast-note-sync"
-fetch.github = "erichll/go-fast-note-sync"
-
 [danmakufactory]
 src.git = "https://github.com/hihkm/DanmakuFactory.git"
 fetch.github = "hihkm/DanmakuFactory"
@@ -35,21 +31,9 @@ fetch.github = "hihkm/DanmakuFactory"
 src.git = "https://github.com/js0ny/oroot.git"
 fetch.git = "https://github.com/js0ny/oroot.git"
 
-[limes]
-src.git = "https://github.com/js0ny/limes.git"
-fetch.git = "https://github.com/js0ny/limes.git"
-
-[coredump-notify]
-src.git = "https://github.com/js0ny/coredump-notify.git"
-fetch.git = "https://github.com/js0ny/coredump-notify.git"
-
 [noname]
 src.github = "libnoname/noname"
 fetch.github = "libnoname/noname"
-
-[ratune]
-src.github = "acmagn/ratune"
-fetch.github = "acmagn/ratune"
 
 [rime-cantonese]
 src.git = "https://github.com/rime/rime-cantonese.git"
@@ -162,32 +146,6 @@ fetch.git = "https://github.com/hesampakdaman/typst-overlay.git"
 src.github = "cashmeredev/kitty-graphics.el"
 fetch.github = "cashmeredev/kitty-graphics.el"
 
-[navidrome-lyrics-bin]
-src.github = "J0R6IT0/navidrome-lyrics-plugin"
-fetch.url = "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v$ver/nd-lyrics.ndp"
-src.prefix = "v"
-
 [sioyek-python-extensions]
 src.git = "https://github.com/ahrm/sioyek-python-extensions.git"
 fetch.git = "https://github.com/ahrm/sioyek-python-extensions.git"
-
-[fast-note-sync-service]
-src.github = "haierkeys/fast-note-sync-service"
-fetch.github = "haierkeys/fast-note-sync-service"
-
-# [ly-community]
-# src.git = "https://codeberg.org/fairyglade/ly-community.git"
-# fetch.git = "https://codeberg.org/fairyglade/ly-community.git"
-
-[sing-box-dashboard]
-src.git = "https://github.com/SagerNet/sing-box-dashboard.git"
-src.branch = "gh-pages"
-fetch.git = "https://github.com/SagerNet/sing-box-dashboard.git"
-
-[sni-fetch]
-src.github = "HelloLingC/SNI-Fetch"
-fetch.github = "HelloLingC/SNI-Fetch"
-
-[xdd]
-src.github = "js0ny/xdd"
-fetch.github = "js0ny/xdd"

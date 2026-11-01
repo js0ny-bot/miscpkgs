@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import sys
-import tomllib
 from pathlib import Path
 
+import tomllib
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from update_utils import update_release
+from update_utils import prefetch_cargo_deps, update_release
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 
@@ -13,12 +14,7 @@ def prepare(pins, source):
     manifest = tomllib.loads((source / "Cargo.toml").read_text())
     if manifest["package"]["version"] != pins["version"]:
         raise ValueError("Release tag and Cargo.toml versions differ")
-    lock = tomllib.loads((source / "Cargo.lock").read_text())
-    if any(package.get("source", "").startswith("git+") for package in lock["package"]):
-        raise ValueError(
-            "Git dependencies require cargoLock.outputHashes in default.nix"
-        )
-    return {}
+    return {"cargoHash": prefetch_cargo_deps(PACKAGE_DIR, pins)}
 
 
 def main():

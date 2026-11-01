@@ -3,11 +3,9 @@
   lib,
   fetchFromGitHub,
   versionCheckHook,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   ...
 }:
-let
-  pins = builtins.fromJSON (builtins.readFile ./pins.json);
-in
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "dirstat-rs";
   inherit (pins) version;
@@ -18,7 +16,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     inherit (pins) rev hash;
   };
 
-  cargoLock.lockFile = "${finalAttrs.src}/Cargo.lock";
+  inherit (pins) cargoHash;
 
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;

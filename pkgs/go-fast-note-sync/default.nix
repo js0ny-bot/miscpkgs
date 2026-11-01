@@ -1,16 +1,20 @@
 {
   buildGoModule,
   lib,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   ...
 }:
-let
-  p = sources.go-fast-note-sync;
-in
 buildGoModule (finalAttrs: {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
-  vendorHash = "sha256-RprORNk78eVi5I2tpZ7P4uy9QDWbnpkbY8R6NopLXcM=";
+  pname = "go-fast-note-sync";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "erichll";
+    repo = "go-fast-note-sync";
+    inherit (pins) rev hash;
+  };
+  inherit (pins) vendorHash;
   postInstall = ''
     mv $out/bin/cmd $out/bin/go-fast-note-sync
   '';

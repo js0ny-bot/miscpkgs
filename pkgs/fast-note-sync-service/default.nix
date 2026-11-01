@@ -1,14 +1,22 @@
 {
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   buildGoModule,
   lib,
+  ...
 }:
 let
-  p = sources.fast-note-sync-service;
   repo = "github.com/haierkeys/fast-note-sync-service";
 in
 buildGoModule (finalAttrs: {
-  inherit (p) pname version src;
+  pname = "fast-note-sync-service";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "haierkeys";
+    repo = "fast-note-sync-service";
+    inherit (pins) rev hash;
+  };
   env.CGO_ENABLED = 0;
   subPackages = [ "." ];
 
@@ -16,7 +24,7 @@ buildGoModule (finalAttrs: {
     export CGO_ENABLED=1
     unset subPackages
   '';
-  vendorHash = "sha256-Qq8cGXzSMrV7HBVAuAMKPwLQRaKP6MIZPqIBNuDtqzw=";
+  inherit (pins) vendorHash;
   ldflags = [
     "-s"
     "-w"

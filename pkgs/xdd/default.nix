@@ -1,18 +1,24 @@
 {
   lib,
   rustPlatform,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
   makeDesktopItem,
   copyDesktopItems,
+  ...
 }:
-let
-  p = sources.xdd;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src version;
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "xdd";
+  inherit (pins) version;
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  src = fetchFromGitHub {
+    owner = "js0ny";
+    repo = "xdd";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   desktopItems = lib.optionals stdenv.hostPlatform.isLinux [
     (makeDesktopItem {
@@ -37,4 +43,4 @@ rustPlatform.buildRustPackage {
     platforms = with lib.platforms; linux ++ darwin;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

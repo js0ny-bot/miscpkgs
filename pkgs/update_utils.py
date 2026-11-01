@@ -9,14 +9,14 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 REPO_DIR = Path(__file__).resolve().parent.parent
-GO_MODULES = """
+DEPENDENCY_DERIVATION = """
 { repo, packageDir, pinsFile }:
 let
   flake = builtins.getFlake repo;
   pkgs = flake.inputs.nixpkgs.legacyPackages.${builtins.currentSystem};
   pins = builtins.fromJSON (builtins.readFile (builtins.toPath pinsFile));
 in
-(pkgs.callPackage (builtins.toPath packageDir) { inherit pins; }).goModules
+(pkgs.callPackage (builtins.toPath packageDir) { inherit pins; }).__DEPENDENCY__
 """
 
 
@@ -37,7 +37,7 @@ def read_url_json(url, headers=None):
         url,
         headers={
             "Accept": "application/json",
-            "User-Agent": "nix-misc-packages-updater",
+            "User-Agent": "miscpkgs-updater",
             **(headers or {}),
         },
     )
@@ -88,13 +88,13 @@ def prefetch_source(owner, repo, rev):
     return result["hash"], Path(result["storePath"])
 
 
-def prefetch_go_modules(package_dir, pins):
+def prefetch_dependency_hash(package_dir, pins, hash_key, expression_text, error):
     with tempfile.TemporaryDirectory(prefix=f"{package_dir.name}-") as temporary:
         candidate = Path(temporary) / "pins.json"
-        candidate_pins = {**pins, "vendorHash": "sha256-" + "A" * 43 + "="}
+        candidate_pins = {**pins, hash_key: "sha256-" + "A" * 43 + "="}
         candidate.write_text(json.dumps(candidate_pins) + "\n")
         expression = Path(temporary) / "modules.nix"
-        expression.write_text(GO_MODULES)
+        expression.write_text(expression_text)
         arguments = (
             "nix",
             "eval",
@@ -129,7 +129,7 @@ def prefetch_go_modules(package_dir, pins):
             text=True,
             capture_output=True,
         )
-        # Only accept a mismatch from the requested modules, not a failing source or toolchain.
+        # Ignore mismatches from other derivations, such as the source or toolchain.
         mismatch = re.search(
             rf"hash mismatch in fixed-output derivation '{re.escape(derivation)}':\s+"
             rf"specified:\s+\S+\s+got:\s+(sha256-[A-Za-z0-9+/]{{43}}=)",
@@ -137,15 +137,33 @@ def prefetch_go_modules(package_dir, pins):
         )
         if result.returncode == 0 or mismatch is None:
             sys.stderr.write(result.stderr)
-            raise RuntimeError(
-                "Expected a vendor hash mismatch from the Go modules derivation"
-            )
-        vendor_hash = require_hash(mismatch[1])
-        candidate_pins["vendorHash"] = vendor_hash
+            raise RuntimeError(error)
+        dependency_hash = require_hash(mismatch[1])
+        candidate_pins[hash_key] = dependency_hash
         candidate.write_text(json.dumps(candidate_pins) + "\n")
         verified = run(*arguments)
         run("nix", "build", "--no-link", "--print-out-paths", f"{verified}^out")
-    return vendor_hash
+    return dependency_hash
+
+
+def prefetch_go_modules(package_dir, pins):
+    return prefetch_dependency_hash(
+        package_dir,
+        pins,
+        "vendorHash",
+        DEPENDENCY_DERIVATION.replace("__DEPENDENCY__", "goModules"),
+        "Expected a vendor hash mismatch from the Go modules derivation",
+    )
+
+
+def prefetch_cargo_deps(package_dir, pins):
+    return prefetch_dependency_hash(
+        package_dir,
+        pins,
+        "cargoHash",
+        DEPENDENCY_DERIVATION.replace("__DEPENDENCY__", "cargoDeps.vendorStaging"),
+        "Expected a cargo vendor hash mismatch",
+    )
 
 
 def atomic_write(path, content):

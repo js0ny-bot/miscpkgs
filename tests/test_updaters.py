@@ -25,6 +25,7 @@ def load_updater(package):
 
 
 dirstat = load_updater("dirstat-rs")
+limes = load_updater("limes")
 komari = load_updater("komari-agent")
 m365 = load_updater("m365")
 SOURCE_HASH = "sha256-" + "A" * 43 + "="
@@ -168,17 +169,76 @@ class UpdaterTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 update_utils.require_hash(value)
 
-    def test_rust_uses_committed_cargo_lock(self):
+    def test_rust_prefetch_verifies_cargo_hash(self):
         (self.root / "Cargo.toml").write_text('[package]\nversion = "1.0.0"\n')
-        (self.root / "Cargo.lock").write_text(
-            '[[package]]\nname = "example"\nsource = "registry+https://example.org"\n'
-        )
-        self.assertEqual(dirstat.prepare(self.current, self.root), {})
-        (self.root / "Cargo.lock").write_text(
-            '[[package]]\nname = "example"\nsource = "git+https://example.org"\n'
-        )
-        with self.assertRaisesRegex(ValueError, "cargoLock.outputHashes"):
+        derivation = "/nix/store/example-vendor-staging.drv"
+        candidate_hashes = []
+
+        def run(*args):
+            if args[1] == "eval":
+                candidate_hashes.append(
+                    json.loads(Path(args[-1]).read_text())["cargoHash"]
+                )
+                return derivation
+            return "/nix/store/verified-vendor"
+
+        mismatch = f"error: hash mismatch in fixed-output derivation '{derivation}':\n  specified: {SOURCE_HASH}\n  got: {DEPENDENCY_HASH}\n"
+        with (
+            patch.object(update_utils, "run", side_effect=run) as commands,
+            patch.object(
+                update_utils.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess([], 1, "", mismatch),
+            ),
+        ):
+            self.assertEqual(
+                dirstat.prepare(self.current, self.root), {"cargoHash": DEPENDENCY_HASH}
+            )
+        self.assertEqual(candidate_hashes, [SOURCE_HASH, DEPENDENCY_HASH])
+        self.assertEqual(commands.call_args.args[-1], f"{derivation}^out")
+
+    def test_rust_rejects_unrelated_hash_mismatch(self):
+        (self.root / "Cargo.toml").write_text('[package]\nversion = "1.0.0"\n')
+        mismatch = f"hash mismatch in fixed-output derivation '/nix/store/source.drv':\n specified: {SOURCE_HASH}\n got: {DEPENDENCY_HASH}"
+        with (
+            patch.object(update_utils, "run", return_value="/nix/store/vendor.drv"),
+            patch.object(
+                update_utils.subprocess,
+                "run",
+                return_value=subprocess.CompletedProcess([], 1, "", mismatch),
+            ),
+            contextlib.redirect_stderr(io.StringIO()),
+            self.assertRaisesRegex(
+                RuntimeError, "Expected a cargo vendor hash mismatch"
+            ),
+        ):
             dirstat.prepare(self.current, self.root)
+
+    def test_limes_snapshot_uses_reachable_tag_and_commit_date(self):
+        def run(*args):
+            if "rev-parse" in args:
+                return REV
+            if "show" in args:
+                return "2026-10-17"
+            if "tag" in args:
+                return "v1.0.0"
+            if "describe" in args:
+                return "v1.0.0"
+            return ""
+
+        with (
+            patch.object(sys, "argv", ["update.py"]),
+            patch.object(limes, "PACKAGE_DIR", self.package),
+            patch.object(limes, "run", side_effect=run),
+            patch.object(limes, "prefetch_source", return_value=(SOURCE_HASH, self.root)),
+            patch.object(limes, "prefetch_cargo_deps", return_value=DEPENDENCY_HASH),
+        ):
+            limes.main()
+        self.assertEqual(
+            json.loads(self.pins_file.read_text()),
+            {"version": "1.0.0-unstable-2026-10-17", "rev": REV,
+             "hash": SOURCE_HASH, "cargoHash": DEPENDENCY_HASH},
+        )
 
     def test_rust_rejects_version_mismatch(self):
         (self.root / "Cargo.toml").write_text('[package]\nversion = "2.0.0"\n')

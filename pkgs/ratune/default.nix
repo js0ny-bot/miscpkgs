@@ -5,18 +5,22 @@
   openssl,
   pkg-config,
   rustPlatform,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
   ...
 }:
-let
-  p = sources.ratune;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "ratune";
+  inherit (pins) version;
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  src = fetchFromGitHub {
+    owner = "acmagn";
+    repo = "ratune";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ pkg-config ];
 
@@ -34,4 +38,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

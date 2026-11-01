@@ -16,7 +16,9 @@ def run(*args, env=None):
 def main():
     system = run("nix", "eval", "--impure", "--raw", "--expr", "builtins.currentSystem")
     package = f"path:.#legacyPackages.{system}.vimPlugins.overleaf-nvim"
-    source = Path(run("nix", "build", f"{package}.src", "--no-link", "--print-out-paths"))
+    source = Path(
+        run("nix", "build", f"{package}.src", "--no-link", "--print-out-paths")
+    )
     old_hash = run("nix", "eval", "--raw", f"{package}.npmDeps.outputHash")
     package_file = PACKAGE_DIR / "default.nix"
     definition = package_file.read_text()
@@ -31,9 +33,21 @@ def main():
         env = dict(os.environ, npm_config_cache=str(Path(temporary) / "npm-cache"))
         _ = subprocess.run(
             [
-                "nix", "shell", "--inputs-from", "path:.", "nixpkgs#nodejs", "nixpkgs#git",
-                "--command", "npm", "--prefix", str(node_dir), "install",
-                "--package-lock-only", "--ignore-scripts", "--no-audit", "--no-fund",
+                "nix",
+                "shell",
+                "--inputs-from",
+                "path:.",
+                "nixpkgs#nodejs",
+                "nixpkgs#git",
+                "--command",
+                "npm",
+                "--prefix",
+                str(node_dir),
+                "install",
+                "--package-lock-only",
+                "--ignore-scripts",
+                "--no-audit",
+                "--no-fund",
             ],
             cwd=REPO_DIR,
             env=env,
@@ -41,8 +55,14 @@ def main():
         )
         lock_file = node_dir / "package-lock.json"
         npm_hash = run(
-            "nix", "shell", "--inputs-from", "path:.", "nixpkgs#prefetch-npm-deps",
-            "--command", "prefetch-npm-deps", str(lock_file),
+            "nix",
+            "shell",
+            "--inputs-from",
+            "path:.",
+            "nixpkgs#prefetch-npm-deps",
+            "--command",
+            "prefetch-npm-deps",
+            str(lock_file),
             env=dict(os.environ, NPM_FETCHER_VERSION="1"),
         )
         if not npm_hash.startswith("sha256-"):
