@@ -1,11 +1,11 @@
 {
   lib,
   stdenvNoCC,
-  sources,
+  fetchurl,
+  ...
 }:
 let
-  hans = sources.rime-lmdg-zh-hans;
-  hant = sources.rime-lmdg-zh-hant;
+  pins = builtins.fromJSON (builtins.readFile ./pins.json);
   makeLMDG =
     p:
     stdenvNoCC.mkDerivation {
@@ -39,6 +39,14 @@ let
     };
 in
 {
-  rime-lmdg-zh-hans = makeLMDG hans;
-  rime-lmdg-zh-hant = makeLMDG hant;
+  rime-lmdg-zh-hans = makeLMDG {
+    pname = "rime-lmdg-zh-hans";
+    version = "LTS";
+    src = fetchurl pins.hans;
+  };
+  rime-lmdg-zh-hant = makeLMDG {
+    pname = "rime-lmdg-zh-hant";
+    version = "LTS";
+    src = fetchurl pins.hant;
+  };
 }

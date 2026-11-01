@@ -1,14 +1,19 @@
 {
   stdenvNoCC,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   lib,
+  ...
 }:
-let
-  p = sources.rime-cantonese;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+stdenvNoCC.mkDerivation (finalAttrs: {
+  pname = "rime-cantonese";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "rime";
+    repo = "rime-cantonese";
+    inherit (pins) rev hash;
+  };
 
   outputs = [
     "out"
@@ -36,4 +41,4 @@ stdenvNoCC.mkDerivation {
     ];
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

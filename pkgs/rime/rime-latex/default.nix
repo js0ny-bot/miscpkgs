@@ -1,18 +1,19 @@
 {
   lib,
   stdenvNoCC,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+  ...
 }:
-let
-  p = sources.rime-latex;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p)
-    pname
-    version
-    src
-    date
-    ;
+stdenvNoCC.mkDerivation (finalAttrs: {
+  pname = "rime-latex";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "shenlebantongying";
+    repo = "rime_latex";
+    inherit (pins) rev hash;
+  };
 
   outputs = [
     "out"
@@ -41,4 +42,4 @@ stdenvNoCC.mkDerivation {
     license = licenses.gpl3Only;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

@@ -1,17 +1,21 @@
 {
   rustPlatform,
   lib,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   ...
 }:
-let
-  p = sources.oroot;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "oroot";
+  inherit (pins) version;
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  src = fetchFromGitHub {
+    owner = "js0ny";
+    repo = "oroot";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   meta = {
     description = "Command-line tool to manipulate impermanence old roots in btrfs";
@@ -21,4 +25,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.linux;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

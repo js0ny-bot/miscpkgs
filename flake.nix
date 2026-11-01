@@ -33,7 +33,6 @@
           legacyPackages = packages.packageSet;
           devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              nvfetcher
               nix-update
               yq-go
               keep-sorted

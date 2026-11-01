@@ -4,8 +4,6 @@
   ...
 }:
 let
-  sources = pkgs.callPackage ../_sources/generated.nix { };
-
   scanPackages =
     path:
     let
@@ -18,7 +16,7 @@ let
         subdir = path + "/${name}";
       in
       if builtins.pathExists (subdir + "/default.nix") then
-        pkgs.callPackage subdir { inherit sources; }
+        pkgs.callPackage subdir { }
       else
         scanPackages subdir
     ) dirs;

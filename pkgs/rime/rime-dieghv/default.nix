@@ -1,14 +1,19 @@
 {
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenvNoCC,
   lib,
+  ...
 }:
-let
-  p = sources.rime-dieghv;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+stdenvNoCC.mkDerivation (finalAttrs: {
+  pname = "rime-dieghv";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "kahaani";
+    repo = "dieghv";
+    inherit (pins) rev hash;
+  };
 
   outputs = [
     "out"
@@ -35,4 +40,4 @@ stdenvNoCC.mkDerivation {
     description = "潮语拼音输入法 (Rime schema for Teochew dialect)";
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

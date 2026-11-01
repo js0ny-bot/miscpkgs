@@ -2,14 +2,21 @@
   stdenv,
   lib,
   cmake,
-  sources,
+  fetchFromGitHub,
+  ...
 }:
 let
-  p = sources.msd_lite;
+  pins = builtins.fromJSON (builtins.readFile ./pins.json);
 in
-stdenv.mkDerivation {
-  inherit (p) pname src;
-  version = "1.11.0-unstable-${p.date}";
+stdenv.mkDerivation (finalAttrs: {
+  pname = "msd_lite";
+  inherit (pins) version;
+  src = fetchFromGitHub {
+    owner = "rozhuk-im";
+    repo = "msd_lite";
+    inherit (pins) rev hash;
+    fetchSubmodules = true;
+  };
 
   nativeBuildInputs = [ cmake ];
 
@@ -26,4 +33,4 @@ stdenv.mkDerivation {
     mainProgram = "msd_lite";
     platforms = platforms.linux;
   };
-}
+})

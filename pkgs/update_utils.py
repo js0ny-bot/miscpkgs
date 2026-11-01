@@ -55,6 +55,10 @@ def latest_release(owner, repo):
     tag = release["tag_name"]
     if not isinstance(tag, str) or not tag:
         raise ValueError("Expected a non-empty release tag")
+    return tag.removeprefix("v"), resolve_tag(owner, repo, tag)
+
+
+def resolve_tag(owner, repo, tag):
     ref = f"refs/tags/{tag}"
     tags = run(
         "git",
@@ -68,7 +72,31 @@ def latest_release(owner, repo):
     rev = refs.get(f"{ref}^{{}}", refs.get(ref, ""))
     if not re.fullmatch(r"[0-9a-f]{40}", rev):
         raise ValueError(f"Could not resolve release tag {tag!r} to a commit")
-    return tag.removeprefix("v"), rev
+    return rev
+
+
+def latest_tag(owner, repo):
+    tags = run(
+        "git", "ls-remote", "--tags", "--refs", "--sort=-version:refname",
+        f"https://github.com/{owner}/{repo}.git",
+    ).splitlines()
+    if not tags:
+        raise ValueError("No tags found")
+    tag = tags[0].split()[1].removeprefix("refs/tags/")
+    return tag.removeprefix("v"), resolve_tag(owner, repo, tag)
+
+
+def latest_snapshot(owner, repo):
+    with tempfile.TemporaryDirectory(prefix=f"{repo}-git-") as directory:
+        run("git", "clone", "--quiet", "--no-checkout", f"https://github.com/{owner}/{repo}.git", directory)
+        rev = run("git", "-C", directory, "rev-parse", "HEAD")
+        date = run("git", "-C", directory, "show", "-s", "--format=%cs", rev)
+        tags = run("git", "-C", directory, "tag", "--merged", rev)
+        version = (
+            run("git", "-C", directory, "describe", "--tags", "--abbrev=0", rev).removeprefix("v")
+            if tags else "0"
+        )
+    return f"{version}-unstable-{date}", rev
 
 
 def prefetch_source(owner, repo, rev):
@@ -166,6 +194,16 @@ def prefetch_cargo_deps(package_dir, pins):
     )
 
 
+def prefetch_pnpm_deps(package_dir, pins):
+    return prefetch_dependency_hash(
+        package_dir,
+        pins,
+        "pnpmHash",
+        DEPENDENCY_DERIVATION.replace("__DEPENDENCY__", "pnpmDeps"),
+        "Expected a pnpm dependency hash mismatch",
+    )
+
+
 def prefetch_nuget_deps(package_dir, pins):
     with tempfile.TemporaryDirectory(prefix=f"{package_dir.name}-") as temporary:
         candidate = Path(temporary) / "pins.json"
@@ -216,7 +254,7 @@ def write_pins(path, pins):
     atomic_write(path, (json.dumps(pins, indent=2) + "\n").encode())
 
 
-def update_release(package_dir, owner, repo, prepare, *, nuget_deps=False):
+def update_release(package_dir, owner, repo, prepare, *, nuget_deps=False, snapshot=False, tags=False):
     parser = argparse.ArgumentParser(
         description=f"Update {package_dir.name} source and dependency pins"
     )
@@ -228,7 +266,7 @@ def update_release(package_dir, owner, repo, prepare, *, nuget_deps=False):
     args = parser.parse_args()
     pins_file = package_dir / "pins.json"
     current = json.loads(pins_file.read_text())
-    version, rev = latest_release(owner, repo)
+    version, rev = (latest_snapshot if snapshot else latest_tag if tags else latest_release)(owner, repo)
     if current["version"] == version and current["rev"] == rev and not args.force:
         print(f"{package_dir.name} is up to date at {version}")
         return

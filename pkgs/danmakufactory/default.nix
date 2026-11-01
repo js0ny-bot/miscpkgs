@@ -1,17 +1,20 @@
 {
   lib,
   pcre2,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenv,
   xmake,
+  ...
 }:
-let
-  p = sources.danmakufactory;
-in
-stdenv.mkDerivation {
+stdenv.mkDerivation (finalAttrs: {
   pname = "danmakufactory";
-  version = "2.0.0-unstable-${p.date}";
-  inherit (p) src;
+  inherit (pins) version;
+  src = fetchFromGitHub {
+    owner = "hihkm";
+    repo = "DanmakuFactory";
+    inherit (pins) rev hash;
+  };
 
   patches = [ ./use-system-pcre2.patch ];
 
@@ -52,4 +55,4 @@ stdenv.mkDerivation {
     platforms = with lib.platforms; linux ++ darwin;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

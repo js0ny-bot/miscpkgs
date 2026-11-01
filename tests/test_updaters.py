@@ -25,9 +25,13 @@ def load_updater(package):
 
 
 dirstat = load_updater("dirstat-rs")
+dwproton = load_updater("dwproton")
 limes = load_updater("limes")
 komari = load_updater("komari-agent")
 m365 = load_updater("m365")
+msd_lite = load_updater("msd_lite")
+proton = load_updater("proton-drive-cli")
+noname = load_updater("noname")
 SOURCE_HASH = "sha256-" + "A" * 43 + "="
 DEPENDENCY_HASH = "sha256-" + "B" * 43 + "="
 REV = "a" * 40
@@ -47,6 +51,53 @@ class UpdaterTests(unittest.TestCase):
         self.stdout = contextlib.redirect_stdout(io.StringIO())
         self.stdout.__enter__()
         self.addCleanup(self.stdout.__exit__, None, None, None)
+
+    def test_msd_lite_prefetches_submodules(self):
+        with (
+            patch.object(sys, "argv", ["update.py", "--force"]),
+            patch.object(msd_lite, "PACKAGE_DIR", self.package),
+            patch.object(msd_lite, "latest_snapshot", return_value=("0-unstable-2026-01-01", REV)),
+            patch.object(msd_lite, "run", side_effect=[json.dumps({"sha256": "hash"}), SOURCE_HASH]) as run,
+        ):
+            msd_lite.main()
+        self.assertIn("--fetch-submodules", run.call_args_list[0].args)
+        self.assertEqual(json.loads(self.pins_file.read_text()), {
+            "version": "0-unstable-2026-01-01", "rev": REV, "hash": SOURCE_HASH,
+        })
+
+    def test_proton_updates_all_architectures(self):
+        platforms = ("linux-x64", "linux-arm64", "darwin-arm64")
+        page = " ".join(f"https://proton.me/download/drive/cli/2.0.0/{p}/proton-drive" for p in platforms)
+        with (
+            patch.object(sys, "argv", ["update.py"]),
+            patch.object(proton, "PACKAGE_DIR", self.package),
+            patch.object(proton, "urlopen", return_value=io.BytesIO(page.encode())),
+            patch.object(proton, "run", return_value=json.dumps({"hash": SOURCE_HASH})) as run,
+        ):
+            proton.main()
+        pins = json.loads(self.pins_file.read_text())
+        self.assertEqual(pins["version"], "2.0.0")
+        self.assertEqual(run.call_count, 3)
+        for platform in platforms:
+            self.assertEqual(pins[platform]["hash"], SOURCE_HASH)
+            self.assertTrue(pins[platform]["url"].endswith(f"/{platform}/proton-drive"))
+
+    def test_proton_failed_prefetch_preserves_pins(self):
+        page = " ".join(f"https://proton.me/download/drive/cli/2.0.0/{p}/proton-drive" for p in ("linux-x64", "linux-arm64", "darwin-arm64"))
+        with (
+            patch.object(sys, "argv", ["update.py"]),
+            patch.object(proton, "PACKAGE_DIR", self.package),
+            patch.object(proton, "urlopen", return_value=io.BytesIO(page.encode())),
+            patch.object(proton, "run", side_effect=[json.dumps({"hash": SOURCE_HASH}), RuntimeError("failed")]),
+            self.assertRaisesRegex(RuntimeError, "failed"),
+        ):
+            proton.main()
+        self.assertEqual(self.pins_file.read_bytes(), self.original)
+
+    def test_noname_uses_pnpm_hash_helper(self):
+        with patch.object(noname, "prefetch_pnpm_deps", return_value=DEPENDENCY_HASH) as fetch:
+            self.assertEqual(noname.prepare(self.current, self.root), {"pnpmHash": DEPENDENCY_HASH})
+        fetch.assert_called_once_with(noname.PACKAGE_DIR, self.current)
 
     def test_release_resolves_annotated_tag_and_uses_github_token(self):
         with (
@@ -79,6 +130,38 @@ class UpdaterTests(unittest.TestCase):
                 update_utils.latest_release("owner", "repo"), ("1.0.0", REV)
             )
             self.assertEqual(request.call_args.args[1], {})
+
+    def test_latest_tag_resolves_annotated_tag(self):
+        tag = "refs/tags/v2.0.0"
+        with patch.object(
+            update_utils, "run", side_effect=[f"{'b' * 40}\t{tag}", f"{'b' * 40}\t{tag}\n{REV}\t{tag}^{{}}"]
+        ):
+            self.assertEqual(update_utils.latest_tag("owner", "repo"), ("2.0.0", REV))
+
+    def test_dwproton_pins_release_asset(self):
+        release = {
+            "tag_name": "dwproton-11.0-16",
+            "assets": [{"name": "dwproton-11.0-16-x86_64.tar.xz", "browser_download_url": "https://example.org/archive.tar.xz"}],
+        }
+        with (
+            patch.object(sys, "argv", ["update.py"]),
+            patch.object(dwproton, "PACKAGE_DIR", self.package),
+            patch.object(dwproton, "read_url_json", return_value=release),
+            patch.object(dwproton, "run", return_value=json.dumps({"hash": SOURCE_HASH})),
+        ):
+            dwproton.main()
+        self.assertEqual(json.loads(self.pins_file.read_text()), {
+            "version": "11.0-16", "url": "https://example.org/archive.tar.xz", "hash": SOURCE_HASH,
+        })
+
+    def test_snapshot_uses_most_recent_reachable_tag(self):
+        with patch.object(
+            update_utils, "run", side_effect=["", REV, "2026-10-17", "v1.2.3", "v1.2.3"]
+        ):
+            self.assertEqual(
+                update_utils.latest_snapshot("owner", "repo"),
+                ("1.2.3-unstable-2026-10-17", REV),
+            )
 
     def test_release_rejects_missing_commit(self):
         with (

@@ -6,15 +6,18 @@
   makeWrapper,
   nodejs_24,
   pnpm_10,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+  ...
 }:
-let
-  p = sources.noname;
-in
 stdenv.mkDerivation (finalAttrs: {
   pname = "noname";
-  inherit (p) src;
-  version = lib.removePrefix "v" p.version;
+  inherit (pins) version;
+  src = fetchFromGitHub {
+    owner = "libnoname";
+    repo = "noname";
+    inherit (pins) rev hash;
+  };
 
   pnpmRoot = ".";
 
@@ -34,7 +37,7 @@ stdenv.mkDerivation (finalAttrs: {
       ;
     pnpm = pnpm_10;
     fetcherVersion = 3;
-    hash = "sha256-H2vYuaMY2w7MbHf934t7lTAQXf7rb0xW3+2ZhK83zjg=";
+    hash = pins.pnpmHash;
   };
 
   pnpmInstallFlags = [ "--frozen-lockfile" ];

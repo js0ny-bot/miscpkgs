@@ -1,14 +1,19 @@
 {
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   stdenvNoCC,
   lib,
+  ...
 }:
-let
-  p = sources.rime-teochew;
-in
-stdenvNoCC.mkDerivation {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+stdenvNoCC.mkDerivation (finalAttrs: {
+  pname = "rime-teochew";
+  inherit (pins) version;
+
+  src = fetchFromGitHub {
+    owner = "OpenTeochew";
+    repo = "rime-teochew";
+    inherit (pins) rev hash;
+  };
 
   outputs = [
     "out"
@@ -40,4 +45,4 @@ stdenvNoCC.mkDerivation {
     '';
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

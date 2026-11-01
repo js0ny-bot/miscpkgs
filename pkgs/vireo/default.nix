@@ -8,18 +8,23 @@
   openssl,
   libadwaita,
   webkitgtk_6_0,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
   lib,
   poppler-utils,
+  ...
 }:
-let
-  p = sources.vireo;
-in
-rustPlatform.buildRustPackage {
-  inherit (p) pname src;
-  version = lib.removePrefix "v" p.version;
+rustPlatform.buildRustPackage (finalAttrs: {
+  pname = "vireo";
+  inherit (pins) version;
 
-  cargoLock.lockFile = "${p.src}/Cargo.lock";
+  src = fetchFromGitHub {
+    owner = "hyprlab";
+    repo = "vireo";
+    inherit (pins) rev hash;
+  };
+
+  inherit (pins) cargoHash;
 
   nativeBuildInputs = [
     glib
@@ -50,4 +55,4 @@ rustPlatform.buildRustPackage {
     platforms = lib.platforms.linux;
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
-}
+})

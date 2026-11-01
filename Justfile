@@ -1,6 +1,5 @@
 update:
     nix flake update
-    nvfetcher
     ./helper/update
 
 update-jellyfin-ldapauth:

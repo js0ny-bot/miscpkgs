@@ -2,14 +2,18 @@
   lib,
   stdenvNoCC,
   bash,
-  sources,
+  fetchFromGitHub,
+  pins ? builtins.fromJSON (builtins.readFile ./pins.json),
+  ...
 }:
-let
-  p = sources.forgejo-file-icons;
-in
 stdenvNoCC.mkDerivation (finalAttrs: {
-  inherit (p) pname src;
-  version = "0-unstable-${p.date}";
+  pname = "forgejo-file-icons";
+  inherit (pins) version;
+  src = fetchFromGitHub {
+    owner = "js0ny";
+    repo = "forgejo-file-icons";
+    inherit (pins) rev hash;
+  };
 
   nativeBuildInputs = [ bash ];
 
