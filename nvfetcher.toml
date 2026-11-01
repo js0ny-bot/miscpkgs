@@ -1,8 +1,3 @@
-[clair-obscur-fix]
-src.webpage = "https://codeberg.org/Lyall/ClairObscurFix/releases"
-src.regex = "ClairObscurFix_([0-9.]+)\\.zip"
-fetch.tarball = "https://codeberg.org/Lyall/ClairObscurFix/releases/download/$ver/ClairObscurFix_$ver.zip"
-
 [bbdown]
 src.github = "nilaoda/BBDown"
 fetch.github = "nilaoda/BBDown"
